@@ -1,0 +1,160 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+<table class="table-striped" width="100%">
+    <thead>
+        <tr>            
+            <td>
+                <h5>Level</h5>
+            </td>
+            <td>
+                <h5>Low DC</h5>
+            </td>
+            <td>
+                <h5>Med DC</h5>
+            </td>
+            <td>
+                <h5>High DC</h5>
+            </td>
+            <td>
+                <h5>Minion dmg</h5>
+            </td>
+            <td>
+                <h5>Avg AC</h5>
+            </td>
+            <td>
+                <h5>Avg Def</h5>
+            </td>
+            <td>
+                <h5>Low HP</h5>
+            </td>
+            <td>
+                <h5>Med HP</h5>
+            </td>
+            <td>
+                <h5>High HP</h5>
+            </td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><select id="levelSelect"></select></td>
+            <td><span id="lowDCText"></span></td>
+            <td><span id="medDCText"></span></td>
+            <td><span id="highDCText"></span></td>
+            <td><span id="minionDmgText"></span></td>
+            <td><span id="avgACText"></span></td>
+            <td><span id="avgDefText"></span></td>
+            <td><span id="lowHPText"></span></td>
+            <td><span id="medHPText"></span></td>
+            <td><span id="highHPText"></span></td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td>Atk vs AC</td>
+            <td>Atk vs Def</td>
+            <td>Low dmg</td>
+            <td>Med dmg</td>
+            <td>High dmg</td>
+            <td>High Ltd dmg</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td><span id="atkACText"></span></td>
+            <td><span id="atkDefText"></span></td>
+            <td><span id="lowDmgText"></span></td>
+            <td><span id="medDmgText"></span></td>
+            <td><span id="highDmgText"></span></td>
+            <td><span id="highLtdDmgText"></span></td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+        </tr>
+        <tr>
+            <td colspan="10" align="right">
+                <a id="rollButton" href="#" class="btn btn-primary btn-large">Roll</a>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+@section scripts{
+<script type="text/javascript">
+    var levels;
+    var currentLevel;
+
+    $(document).ready(function () {        
+        $.getJSON("/Scripts/levelData.js", function (data) {
+            levels = data.levels;
+            $.each(levels, function (index, value) {                
+                $("#levelSelect")
+                    .append($("<option></option>")
+                    .attr("value", value.level)
+                    .text(value.level));
+            });
+
+            currentLevel = levels[0];
+            updateLevel();
+
+            $("#levelSelect")
+                .change(function () {
+                    currentLevel = levels[this.value - 1];
+                    updateLevel();
+                });
+
+            $("#rollButton").click(function () {                
+                $("#atkACText").text(rollDice(currentLevel.atkAC));
+                $("#atkDefText").text(rollDice(currentLevel.atkDef));
+                $("#lowDmgText").text(rollDice(currentLevel.lowDmg));
+                $("#medDmgText").text(rollDice(currentLevel.medDmg));
+                $("#highDmgText").text(rollDice(currentLevel.highDmg));
+                $("#highLtdDmgText").text(rollDice(currentLevel.highLtdDmg));
+            });
+        });
+    });
+
+    function updateLevel() {
+        $("#lowDCText").text(currentLevel.lowDC);
+        $("#medDCText").text(currentLevel.medDC);
+        $("#highDCText").text(currentLevel.highDC);
+        $("#minionDmgText").text(currentLevel.minionDmg);
+        $("#avgACText").text(currentLevel.avgAC);
+        $("#avgDefText").text(currentLevel.avgDef);
+        $("#lowHPText").text(currentLevel.lowHP);
+        $("#medHPText").text(currentLevel.medHP);
+        $("#highHPText").text(currentLevel.highHP);
+
+        $("#atkACText").text("");
+        $("#atkDefText").text("");
+        $("#lowDmgText").text("");
+        $("#medDmgText").text("");
+        $("#highDmgText").text("");
+        $("#highLtdDmgText").text("");
+    }
+
+    function rollDice(diceString) {
+        var diceRegex = /^(\d+)d(\d+)\+(\d+)$/g;
+        var match = diceRegex.exec(diceString);
+
+        if (match) {
+            debugger;
+            var numberOfDice = parseInt(match[1]);
+            var dieSize = parseInt(match[2]);
+            var result = parseInt(match[3]);
+
+            for (var i = 0; i < numberOfDice; i++) {
+                result += Math.floor((Math.random() * dieSize) + 1);
+            }
+
+            return result;
+        } else {
+            alert("Woah, the dice format is bad: " + diceString);
+            return 0;
+        }
+    }
+</script>
+}
